@@ -1,0 +1,48 @@
+# ---- Build output (Maven) ----
+target/
+backend/target/
+*.class
+*.jar
+*.war
+
+# ---- Java / IDE ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.vscode/
+bin/
+out/
+
+# ---- Local config / secrets ----
+backend/db.properties
+db.properties
+*.env
+.env
+*.pem
+*.key
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+build/
+.cache/
+
+# ---- Python / judge ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# ---- OS noise ----
+.DS_Store
+Thumbs.db
+desktop.ini
