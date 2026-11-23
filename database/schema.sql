@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS testora;
+USE testora;
+
+CREATE TABLE users (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100) NOT NULL, email VARCHAR(150) NOT NULL UNIQUE, password_hash VARCHAR(100) NOT NULL, role ENUM('STUDENT','FACULTY','ADMIN') NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE topics (id BIGINT PRIMARY KEY AUTO_INCREMENT, topic_name VARCHAR(100) NOT NULL UNIQUE);
+CREATE TABLE problems (id BIGINT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(200) NOT NULL, slug VARCHAR(220) NOT NULL UNIQUE, description TEXT NOT NULL, difficulty ENUM('Easy','Medium','Hard') NOT NULL, starter_code TEXT, topic_id BIGINT NOT NULL, time_limit_sec INT NOT NULL DEFAULT 2, max_marks INT NOT NULL DEFAULT 100, FOREIGN KEY (topic_id) REFERENCES topics(id), INDEX idx_problem_difficulty(difficulty), INDEX idx_problem_topic(topic_id));
+CREATE TABLE problem_testcases (id BIGINT PRIMARY KEY AUTO_INCREMENT, problem_id BIGINT NOT NULL, input TEXT, expected_output TEXT NOT NULL, is_hidden BOOLEAN NOT NULL DEFAULT FALSE, FOREIGN KEY (problem_id) REFERENCES problems(id) ON DELETE CASCADE);
+CREATE TABLE submissions (id BIGINT PRIMARY KEY AUTO_INCREMENT, user_id BIGINT NOT NULL, problem_id BIGINT NOT NULL, source_code MEDIUMTEXT NOT NULL, verdict VARCHAR(40) NOT NULL, score DECIMAL(7,2) NOT NULL DEFAULT 0, execution_time_ms BIGINT DEFAULT 0, submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (problem_id) REFERENCES problems(id), INDEX idx_submission_user(user_id));
+CREATE TABLE submission_test_results (id BIGINT PRIMARY KEY AUTO_INCREMENT, submission_id BIGINT NOT NULL, testcase_id BIGINT NOT NULL, verdict VARCHAR(40) NOT NULL, execution_time_ms BIGINT DEFAULT 0, FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE, FOREIGN KEY (testcase_id) REFERENCES problem_testcases(id));
+CREATE TABLE assessments (id BIGINT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(200) NOT NULL, duration_minutes INT NOT NULL, created_by BIGINT NOT NULL, FOREIGN KEY (created_by) REFERENCES users(id));
+CREATE TABLE assessment_questions (id BIGINT PRIMARY KEY AUTO_INCREMENT, assessment_id BIGINT NOT NULL, problem_id BIGINT NOT NULL, marks INT NOT NULL, FOREIGN KEY (assessment_id) REFERENCES assessments(id) ON DELETE CASCADE, FOREIGN KEY (problem_id) REFERENCES problems(id));

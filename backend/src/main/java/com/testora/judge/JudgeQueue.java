@@ -1,0 +1,4 @@
+package com.testora.judge;
+import java.util.*; import java.util.concurrent.*;
+/** Owns the prioritized worker queue and a clean shutdown lifecycle. */
+public class JudgeQueue implements AutoCloseable {private final PriorityBlockingQueue<JudgeJob> jobs=new PriorityBlockingQueue<>();private final List<JudgeWorker> workers=new ArrayList<>();private final List<Thread> threads=new ArrayList<>(); public JudgeQueue(int count){for(int i=0;i<count;i++){JudgeWorker w=new JudgeWorker(this);workers.add(w);Thread t=new Thread(w,"judge-"+i);threads.add(t);t.start();}} public CompletableFuture<JudgeOutcome> submit(JudgeJob job){jobs.add(job);return job.future;} JudgeJob take()throws InterruptedException{return jobs.take();} public void close(){workers.forEach(JudgeWorker::stop);threads.forEach(Thread::interrupt);}}

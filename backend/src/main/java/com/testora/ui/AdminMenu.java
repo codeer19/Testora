@@ -1,0 +1,4 @@
+package com.testora.ui;
+import com.testora.dao.UserDAO;import com.testora.model.*;import com.testora.util.ConsoleUtil;import java.util.*;
+/** Admin menu adds account administration to faculty capabilities. */
+public class AdminMenu extends FacultyMenu {public AdminMenu(Scanner s,User u){super(s,u);}public void show(){while(true){System.out.println("1 List problems  2 Delete problem  3 List users  4 Delete user  0 Logout");int c=ConsoleUtil.readInt(in,"> ");if(c==0)return;try{if(c==1)problems.browse("","").forEach(p->System.out.println(p.getId()+" "+p.getTitle()));if(c==2)problems.delete((long)ConsoleUtil.readInt(in,"Problem ID: "));if(c==3)new UserDAO().findAll().forEach(x->System.out.println(x.getId()+" "+x.getEmail()+" "+x.getRole()));if(c==4)new UserDAO().delete((long)ConsoleUtil.readInt(in,"User ID: "));}catch(Exception e){System.out.println(e.getMessage());}}}}

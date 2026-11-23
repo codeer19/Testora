@@ -1,0 +1,10 @@
+package com.testora.dao;
+import com.testora.config.DBConnection; import com.testora.model.*; import java.sql.*; import java.util.*;
+/** Saves judge outcomes atomically and reads student history. */
+public class SubmissionDAO {
+ public long saveWithResults(Submission x,List<TestResult> results)throws SQLException{ // SYLLABUS: transaction
+  try(Connection c=DBConnection.getConnection()){c.setAutoCommit(false);try(PreparedStatement s=c.prepareStatement("INSERT INTO submissions(user_id,problem_id,source_code,verdict,score,execution_time_ms) VALUES(?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);PreparedStatement r=c.prepareStatement("INSERT INTO submission_test_results(submission_id,testcase_id,verdict,execution_time_ms) VALUES(?,?,?,?)")){s.setLong(1,x.userId());s.setLong(2,x.problemId());s.setString(3,x.sourceCode());s.setString(4,x.verdict());s.setDouble(5,x.score());s.setLong(6,x.executionTimeMs());s.executeUpdate();long id;try(ResultSet k=s.getGeneratedKeys()){k.next();id=k.getLong(1);}for(TestResult t:results){r.setLong(1,id);r.setLong(2,t.testcaseId());r.setString(3,t.verdict());r.setLong(4,t.executionTimeMs());r.addBatch();}r.executeBatch();c.commit();return id;}catch(SQLException e){c.rollback();throw e;}}}
+ public List<Submission> byUser(long userId)throws SQLException{return list("SELECT * FROM submissions WHERE user_id=? ORDER BY submitted_at DESC",userId);}
+ public List<Submission> all()throws SQLException{return list("SELECT * FROM submissions ORDER BY submitted_at DESC",null);}
+ private List<Submission> list(String q,Long id)throws SQLException{List<Submission>a=new ArrayList<>();try(Connection c=DBConnection.getConnection();PreparedStatement s=c.prepareStatement(q)){if(id!=null)s.setLong(1,id);try(ResultSet r=s.executeQuery()){while(r.next())a.add(new Submission(r.getLong("id"),r.getLong("user_id"),r.getLong("problem_id"),r.getString("source_code"),r.getString("verdict"),r.getDouble("score"),r.getLong("execution_time_ms"),r.getString("submitted_at")));}}return a;}
+}

@@ -1,0 +1,4 @@
+package com.testora.service;
+import com.testora.dao.SubmissionDAO; import com.testora.judge.*; import com.testora.model.*; import java.nio.file.*; import java.util.*;
+/** Coordinates source-file reading, queued judgement and persistence. */
+public class SubmissionService {private final SubmissionDAO dao=new SubmissionDAO();private final JudgeQueue queue;public SubmissionService(JudgeQueue q){queue=q;} public JudgeOutcome submit(long user,Problem p,Path file,List<TestCase> tests)throws Exception{String source=Files.readString(file);JudgeOutcome o=queue.submit(new JudgeJob(user,p,source,tests)).get();dao.saveWithResults(new Submission(0,user,p.getId(),source,o.verdict(),o.score(),o.timeMs(),null),o.results());return o;} public List<Submission> history(long id)throws Exception{return dao.byUser(id);} }
